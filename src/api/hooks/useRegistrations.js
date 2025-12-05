@@ -1,0 +1,50 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { registrationsService } from '../services/registrations.service'
+import { QUERY_KEYS } from '@/config/routes.config'
+import toast from 'react-hot-toast'
+
+export const useRegistrations = (params = {}) => {
+    return useQuery({
+        queryKey: [...QUERY_KEYS.ADMIN_REGISTRATIONS, params],
+        queryFn: () => registrationsService.getAll(params),
+    })
+}
+
+export const useRegistration = (id) => {
+    return useQuery({
+        queryKey: ['registration', id],
+        queryFn: () => registrationsService.getById(id),
+        enabled: !!id,
+    })
+}
+
+export const useCreateRegistration = () => {
+    return useMutation({
+        mutationFn: registrationsService.create,
+        onSuccess: () => {
+            toast.success('Registration submitted')
+        },
+    })
+}
+
+export const useUpdateRegistrationStatus = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id, statusData }) => registrationsService.updateStatus(id, statusData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_REGISTRATIONS })
+            toast.success('Status updated')
+        },
+    })
+}
+
+export const useDeleteRegistration = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: registrationsService.delete,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_REGISTRATIONS })
+            toast.success('Registration deleted')
+        },
+    })
+}
