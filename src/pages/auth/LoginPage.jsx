@@ -6,7 +6,11 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react'
 import { useAuth } from '@/api/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
-import { Button, Input, Card, CardContent, CardHeader, ThemeToggle, LanguageSelector } from '../../components/common/index'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { CardContent, Card, CardHeader } from '@/components/ui/card'
+import ThemeToggle from '@/components/ui/theme-toggle'
+import LanguageSelector from '@/components/ui/language-selector'
 import { validate } from '@/utils/validators'
 
 export default function LoginPage() {
@@ -48,23 +52,28 @@ export default function LoginPage() {
 
     if (!validateForm()) return
 
-    const result = await login(formData)
+    try {
+      const result = await login(formData)
 
-    if (result.success) {
       showToast({
         title: t('common.success'),
         description: 'Welcome back!',
         type: 'success'
       })
+
       navigate('/dashboard')
-    } else {
+
+    } catch (error) {
       showToast({
         title: t('common.error'),
-        description: result.message,
+        description:
+          error.response?.data?.message ||
+          t('auth.invalidCredentials'),
         type: 'error'
       })
     }
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">

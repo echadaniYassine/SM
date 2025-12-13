@@ -1,8 +1,8 @@
-import { useMyTimetable } from '@/api/hooks/useStudents'
+import { useStudentTimetable } from '@/api/hooks/useStudents'
 import WeeklyTimetable from '@/components/features/timetable/WeeklyTimetable'
 
 export default function MyTimetablePage() {
-  const { data, isLoading } = useMyTimetable()
+  const { data, isLoading } = useStudentTimetable()
 
   if (isLoading) return <div>Loading...</div>
 

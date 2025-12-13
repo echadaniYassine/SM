@@ -1,3 +1,4 @@
+// router/studentRoutes.jsx
 import StudentDashboardPage from '@/pages/student/StudentDashboardPage'
 import StudentTimetablePage from '@/pages/student/MyTimetablePage'
 import StudentSubjectsPage from '@/pages/student/MySubjectsPage'

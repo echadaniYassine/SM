@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '@/api/hooks/useStudents'
 import StudentList from '@/components/features/students/StudentList'
 import StudentForm from '@/components/forms/StudentForm'
-import Modal from '@/components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function StudentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -30,13 +36,20 @@ export default function StudentsPage() {
 
       <StudentList />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Student Form">
-        <StudentForm
-          student={selectedStudent}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+
+          <StudentForm
+            student={selectedStudent}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { usePrograms, useCreateProgram, useUpdateProgram, useDeleteProgram } from '@/api/hooks/usePrograms'
 import ProgramForm from '@/components/forms/ProgramForm'
-import Modal from '@/components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function ProgramsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -43,13 +49,19 @@ export default function ProgramsPage() {
         ))}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Program Form">
-        <ProgramForm
-          program={selectedProgram}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+          <ProgramForm
+            program={selectedProgram}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

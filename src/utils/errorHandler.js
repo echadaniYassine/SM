@@ -1,3 +1,4 @@
+// utils/errorHandler.js
 export const handleError = (error) => {
   if (error.response?.data?.message) {
     return error.response.data.message

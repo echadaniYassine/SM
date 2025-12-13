@@ -1,3 +1,4 @@
+// src/components/auth/AuthRedirect.jsx
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authSlice'
 

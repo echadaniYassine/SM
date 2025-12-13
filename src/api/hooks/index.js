@@ -1,3 +1,4 @@
+// src/api/hooks/index.js
 export * from './useAuth'
 export * from './useStudents'
 export * from './useTeachers'

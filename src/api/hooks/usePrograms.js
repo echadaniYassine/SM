@@ -1,8 +1,3 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { programsService } from '../services/programs.service'
-import { QUERY_KEYS } from '@/config/routes.config'
-import toast from 'react-hot-toast'
-
 export const usePrograms = (params = {}) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.ADMIN_PROGRAMS, params],
@@ -12,7 +7,7 @@ export const usePrograms = (params = {}) => {
 
 export const useProgram = (id) => {
   return useQuery({
-    queryKey: ['program', id],
+    queryKey: QUERY_KEYS.ADMIN_PROGRAM(id),
     queryFn: () => programsService.getById(id),
     enabled: !!id,
   })
@@ -33,8 +28,9 @@ export const useUpdateProgram = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }) => programsService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PROGRAMS })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PROGRAM(variables.id) })
       toast.success('Program updated')
     },
   })

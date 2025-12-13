@@ -1,3 +1,4 @@
+// src/api/errors.js
 export class ApiError extends Error {
   constructor(error) {
     super(error.message || 'An API error occurred')
@@ -9,23 +10,16 @@ export class ApiError extends Error {
 }
 
 export const handleApiError = (error) => {
-  // Handle 401 Unauthorized - redirect to login
   if (error.response?.status === 401) {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
-    window.location.href = '/login'
-    return Promise.reject(new ApiError(error))
+    const isAuthPage = ['/login', '/register', '/forgot-password'].includes(
+      window.location.pathname
+    )
+
+    if (!isAuthPage) {
+      localStorage.removeItem('auth-storage')
+      window.location.replace('/login')
+    }
   }
 
-  // Handle 403 Forbidden
-  if (error.response?.status === 403) {
-    console.error('Access forbidden:', error)
-  }
-
-  // Handle 500+ Server errors
-  if (error.response?.status >= 500) {
-    console.error('Server error:', error)
-  }
-
-  return Promise.reject(new ApiError(error))
+  return Promise.reject(error)
 }

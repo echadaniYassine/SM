@@ -1,192 +1,34 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '@/store/authSlice';
-import { useNavigate } from 'react-router-dom';
+// src/api/hooks/useAuth.js
+import { useAuthStore } from '@/store/authSlice'
+import { authService } from '@/api/services/auth.service'
+import { useQueryClient } from '@tanstack/react-query'
 
-const API_URL = '/api/auth'; // Adjust to your backend
-
-// Main auth hook with all methods
 export const useAuth = () => {
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const setUser = useAuthStore((state) => state.setUser);
-  const clearUser = useAuthStore((state) => state.clearUser);
-  const queryClient = useQueryClient();
+  const { user, isAuthenticated, setUser, setToken, clearUser } = useAuthStore()
+  const queryClient = useQueryClient()
 
-  // Login function
   const login = async (credentials) => {
-    try {
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      const data = await response.json();
-      
-      // Handle different response formats
-      const responseData = data.data || data;
-      const { user, token } = responseData;
-      
-      if (user && token) {
-        setUser(user);
-        useAuthStore.getState().setToken(token);
-        queryClient.setQueryData(['currentUser'], user);
-        return { success: true };
-      }
-      
-      throw new Error('Invalid response format');
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  };
+    const data = await authService.login(credentials)
+    setUser(data.data.user)
+    setToken(data.data.token)
+    return data
+  }
 
-  // Register function
-  const register = async (userData) => {
-    try {
-      const response = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-      
-      const data = await response.json();
-      
-      // Handle different response formats
-      const responseData = data.data || data;
-      const user = responseData.guardian || responseData.user;
-      const { token } = responseData;
-      
-      if (user && token) {
-        setUser(user);
-        useAuthStore.getState().setToken(token);
-        queryClient.setQueryData(['currentUser'], user);
-        return { success: true };
-      }
-      
-      throw new Error('Invalid response format');
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  };
+  const register = async (payload) => {
+    const data = await authService.register(payload)
+    setUser(data.data.user || data.data.guardian)
+    setToken(data.data.token)
+    return data
+  }
 
-  // Logout function
   const logout = async () => {
     try {
-      await fetch(`${API_URL}/logout`, { 
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${useAuthStore.getState().token}`
-        }
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
+      await authService.logout()
     } finally {
-      clearUser();
-      queryClient.clear();
+      clearUser()
+      queryClient.clear()
     }
-  };
+  }
 
-  return {
-    user,
-    isAuthenticated,
-    loading: false, // Add if needed by your components
-    login,
-    register,
-    logout
-  };
-};
-
-// Optional: Separate mutation hooks if you prefer
-export const useLogin = () => {
-  const setUser = useAuthStore((state) => state.setUser);
-  const setToken = useAuthStore((state) => state.setToken);
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (credentials) => {
-      const response = await fetch(`${API_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      const responseData = data.data || data;
-      const { user, token } = responseData;
-      setUser(user);
-      setToken(token);
-      queryClient.setQueryData(['currentUser'], user);
-    }
-  });
-};
-
-export const useRegister = () => {
-  const setUser = useAuthStore((state) => state.setUser);
-  const setToken = useAuthStore((state) => state.setToken);
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (userData) => {
-      const response = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      const responseData = data.data || data;
-      const user = responseData.guardian || responseData.user;
-      const { token } = responseData;
-      setUser(user);
-      setToken(token);
-      queryClient.setQueryData(['currentUser'], user);
-    }
-  });
-};
-
-export const useLogout = () => {
-  const clearUser = useAuthStore((state) => state.clearUser);
-  const queryClient = useQueryClient();
-  const token = useAuthStore((state) => state.token);
-
-  return useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`${API_URL}/logout`, { 
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) throw new Error('Logout failed');
-      return response.json();
-    },
-    onSuccess: () => {
-      clearUser();
-      queryClient.clear();
-    }
-  });
-};
+  return { user, isAuthenticated, login, register, logout }
+}

@@ -1,3 +1,4 @@
+// src/components/forms/SubjectForm.jsx
 import { useForm } from 'react-hook-form'
 
 export default function SubjectForm({ subject, onSubmit, onCancel }) {

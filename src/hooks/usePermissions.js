@@ -1,3 +1,4 @@
+// src/hooks/usePermissions.js
 import { useAuth } from './useAuth'
 
 export const usePermissions = () => {

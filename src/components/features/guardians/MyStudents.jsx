@@ -1,7 +1,7 @@
-import { useMyStudents } from '@/api/hooks/useGuardians'
+import { useGuardianStudents } from '@/api/hooks/useGuardians'
 
 export default function MyStudents() {
-  const { data, isLoading } = useMyStudents()
+  const { data, isLoading } = useGuardianStudents()
 
   if (isLoading) return <div>Loading...</div>
 

@@ -1,3 +1,4 @@
+// store/uiSlice.js
 import { create } from 'zustand'
 
 export const useUIStore = create((set) => ({

@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { useTimetables, useCreateTimetable, useUpdateTimetable, useDeleteTimetable } from '@/api/hooks/useTimetable'
 import TimetableForm from '@/components/forms/TimetableForm'
-import Modal from '@/components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function TimetablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -45,13 +51,20 @@ export default function TimetablePage() {
         ))}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Timetable Form">
-        <TimetableForm
-          timetable={selectedTimetable}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+
+          <TimetableForm
+            timetable={selectedTimetable}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

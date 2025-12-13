@@ -1,3 +1,4 @@
+// router/adminRoutes.jsx
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import StudentsPage from '@/pages/admin/StudentsPage'
 import TeachersPage from '@/pages/admin/TeachersPage'

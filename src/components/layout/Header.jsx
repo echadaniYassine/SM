@@ -1,17 +1,30 @@
-import { useAuthStore } from '@/store/authSlice'
-import { useLogout } from '@/api/hooks/useAuth'
+// src/components/layout/Header.jsx
+import { Menu } from 'lucide-react'
+import { Button } from '../ui/button'
+import ThemeToggle from '../ui/theme-toggle'
+import LanguageSelector from '../ui/language-selector'
 
-export default function Header() {
-  const user = useAuthStore((state) => state.user)
-  const { mutate: logout } = useLogout()
-
+export function Header({ setSidebarOpen }) {
   return (
-    <header>
-      <h1>School Management</h1>
-      <div>
-        <span>{user?.name}</span>
-        <button onClick={() => logout()}>Logout</button>
+    <div className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 sm:px-6">
+      
+      {/* Mobile Menu Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setSidebarOpen(true)}
+        className="lg:hidden"
+      >
+        <Menu className="w-5 h-5" />
+      </Button>
+
+      <div className="flex-1" />
+
+      {/* Language + Theme */}
+      <div className="flex items-center gap-2">
+        <LanguageSelector />
+        <ThemeToggle />
       </div>
-    </header>
+    </div>
   )
 }

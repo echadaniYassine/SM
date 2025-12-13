@@ -8,7 +8,11 @@ import {
   UserPlus, Loader2, Check, ArrowRight 
 } from 'lucide-react'
 import { useAuth } from '@/api/hooks/useAuth'
-import { Button, Input, Card, CardContent, CardHeader, ThemeToggle, LanguageSelector } from '../../components/common/index'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { CardContent, Card, CardHeader } from '@/components/ui/card'
+import  ThemeToggle  from '@/components/ui/theme-toggle'
+import  LanguageSelector  from '@/components/ui/language-selector'
 import { useToast } from '@/hooks/useToast'
 import { cn } from '@/utils/helpers'
 

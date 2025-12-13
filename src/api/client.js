@@ -1,3 +1,4 @@
+// src/api/client.js
 import axios from 'axios'
 import { handleApiError } from './errors'
 
@@ -28,13 +29,21 @@ export const api = axios.create({
 // Attach token to protected requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const storage = localStorage.getItem('auth-storage')
+
+    if (storage) {
+      const parsed = JSON.parse(storage)
+      const token = parsed?.state?.token
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
+
     return config
   },
   (error) => Promise.reject(error)
 )
+
 
 api.interceptors.response.use((r) => r, handleApiError)

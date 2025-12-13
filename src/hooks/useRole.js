@@ -1,3 +1,4 @@
+// src/hooks/useRole.js
 import { useAuthStore } from '@/store/authSlice'
 
 export const useRole = () => {

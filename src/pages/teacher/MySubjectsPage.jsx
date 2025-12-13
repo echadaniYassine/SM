@@ -1,7 +1,7 @@
-import { useMySubjects } from '@/api/hooks/useTeachers'
+import { useTeacherSubjects } from '@/api/hooks/useTeachers'
 
 export default function MySubjectsPage() {
-  const { data, isLoading } = useMySubjects()
+  const { data, isLoading } = useTeacherSubjects()
 
   if (isLoading) return <div>Loading...</div>
 

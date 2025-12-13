@@ -1,3 +1,4 @@
+// src/config/app.config.js
 export const APP_CONFIG = {
   name: 'School Management System',
   version: '1.0.0',

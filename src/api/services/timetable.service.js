@@ -1,3 +1,4 @@
+// src/api/services/timetable.service.js
 import { api } from '../client'
 
 export const timetableService = {

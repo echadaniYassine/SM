@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher } from '@/api/hooks/useTeachers'
 import TeacherList from '@/components/features/teachers/TeacherList'
 import TeacherForm from '@/components/forms/TeacherForm'
-import Modal from '../../components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function TeachersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -30,13 +36,20 @@ export default function TeachersPage() {
 
       <TeacherList />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Teacher Form">
-        <TeacherForm
-          teacher={selectedTeacher}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+
+          <TeacherForm
+            teacher={selectedTeacher}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

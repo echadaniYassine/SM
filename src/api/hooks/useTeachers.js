@@ -1,8 +1,3 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { teachersService } from '../services/teachers.service'
-import { QUERY_KEYS } from '@/config/routes.config'
-import toast from 'react-hot-toast'
-
 export const useTeachers = (params = {}) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.ADMIN_TEACHERS, params],
@@ -12,7 +7,7 @@ export const useTeachers = (params = {}) => {
 
 export const useTeacher = (id) => {
   return useQuery({
-    queryKey: ['teacher', id],
+    queryKey: QUERY_KEYS.ADMIN_TEACHER(id),
     queryFn: () => teachersService.getById(id),
     enabled: !!id,
   })
@@ -33,8 +28,9 @@ export const useUpdateTeacher = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }) => teachersService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_TEACHERS })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_TEACHER(variables.id) })
       toast.success('Teacher updated')
     },
   })
@@ -51,16 +47,16 @@ export const useDeleteTeacher = () => {
   })
 }
 
-export const useMySubjects = () => {
+export const useTeacherSubjects = () => {
   return useQuery({
-    queryKey: ['my-subjects'],
+    queryKey: QUERY_KEYS.TEACHER_SUBJECTS,
     queryFn: teachersService.mySubjects,
   })
 }
 
-export const useMyTimetable = () => {
+export const useTeacherTimetable = () => {
   return useQuery({
-    queryKey: ['my-timetable'],
+    queryKey: QUERY_KEYS.TEACHER_TIMETABLE,
     queryFn: teachersService.myTimetable,
   })
 }

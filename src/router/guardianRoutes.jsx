@@ -1,3 +1,4 @@
+// router/guardianRoutes.jsx
 import GuardianDashboardPage from '@/pages/guardian/GuardianDashboardPage'
 import MyStudentsPage from '@/pages/guardian/MyStudentsPage'
 

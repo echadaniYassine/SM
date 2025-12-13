@@ -1,3 +1,4 @@
+// utils/formatters.js
 export const formatDate = (date) => {
   return new Date(date).toLocaleDateString()
 }

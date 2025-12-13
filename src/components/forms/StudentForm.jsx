@@ -1,3 +1,4 @@
+// src/components/forms/StudentForm.jsx
 import { useForm } from 'react-hook-form'
 
 export default function StudentForm({ student, onSubmit, onCancel }) {

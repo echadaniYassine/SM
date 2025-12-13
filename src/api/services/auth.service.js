@@ -1,3 +1,4 @@
+// src/api/services/auth.service.js
 import { authApi, api } from '../client'
 import { API_ENDPOINTS } from '@/config/routes.config'
 

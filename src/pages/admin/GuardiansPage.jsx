@@ -2,7 +2,13 @@ import { useState } from 'react'
 import { useGuardians, useCreateGuardian, useUpdateGuardian, useDeleteGuardian } from '@/api/hooks/useGuardians'
 import GuardianList from '@/components/features/guardians/GuardianList'
 import GuardianForm from '@/components/forms/GuardianForm'
-import Modal from '../../components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function GuardiansPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -31,12 +37,22 @@ export default function GuardiansPage() {
       <GuardianList />
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Guardian Form">
-        <GuardianForm
-          guardian={selectedGuardian}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
+
       </Modal>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+          <GuardianForm
+            guardian={selectedGuardian}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

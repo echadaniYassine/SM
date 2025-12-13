@@ -1,95 +1,67 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { studentsService } from '../services/students.service'
+import { QUERY_KEYS } from '@/config/routes.config'
+import toast from 'react-hot-toast'
 
-const API_URL = '/api/students'; // Adjust to your API endpoint
-
-// Fetch students
-export const useStudents = () => {
+export const useStudents = (params = {}) => {
   return useQuery({
-    queryKey: ['students'],
-    queryFn: async () => {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Failed to fetch students');
-      return response.json();
-    }
-  });
-};
+    queryKey: [...QUERY_KEYS.ADMIN_STUDENTS, params],
+    queryFn: () => studentsService.getAll(params),
+  })
+}
 
-// Create student
+export const useStudent = (id) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.ADMIN_STUDENT(id),
+    queryFn: () => studentsService.getById(id),
+    enabled: !!id,
+  })
+}
+
 export const useCreateStudent = () => {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (studentData) => {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData)
-      });
-      if (!response.ok) throw new Error('Failed to create student');
-      return response.json();
-    },
+    mutationFn: studentsService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['students'] });
-    }
-  });
-};
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENTS })
+      toast.success('Student created')
+    },
+  })
+}
 
-// Update student
 export const useUpdateStudent = () => {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, data }) => {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update student');
-      return response.json();
+    mutationFn: ({ id, data }) => studentsService.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENTS })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENT(variables.id) })
+      toast.success('Student updated')
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['students'] });
-    }
-  });
-};
+  })
+}
 
-export const useMyTimetable = () => {
-  return useQuery({
-    queryKey: ['myTimetable'],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/my-timetable`);
-      if (!response.ok) throw new Error('Failed to fetch timetable');
-      return response.json();
-    }
-  });
-};
-
-// Delete student
 export const useDeleteStudent = () => {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (id) => {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
-      });
-      if (!response.ok) throw new Error('Failed to delete student');
-      return response.json();
-    },
+    mutationFn: studentsService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['students'] });
-    }
-  });
-};
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENTS })
+      toast.success('Student deleted')
+    },
+  })
+}
 
-export const useMySubjects = () => {
+export const useStudentTimetable = () => {
   return useQuery({
-    queryKey: ['mySubjects'],
-    queryFn: async () => {
-      const response = await fetch(`${API_URL}/my-subjects`);
-      if (!response.ok) throw new Error('Failed to fetch subjects');
-      return response.json();
-    }
-  });
-};
+    queryKey: QUERY_KEYS.STUDENT_TIMETABLE,
+    queryFn: studentsService.myTimetable,
+  })
+}
+
+export const useStudentSubjects = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.STUDENT_SUBJECTS,
+    queryFn: studentsService.mySubjects,
+  })
+}

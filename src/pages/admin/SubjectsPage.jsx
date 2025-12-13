@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject } from '@/api/hooks/useSubjects'
 import SubjectForm from '@/components/forms/SubjectForm'
-import Modal from '../../components/common/Modal'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog"
 
 export default function SubjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -43,13 +49,20 @@ export default function SubjectsPage() {
         ))}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Subject Form">
-        <SubjectForm
-          subject={selectedSubject}
-          onSubmit={handleSubmit}
-          onCancel={() => setIsModalOpen(false)}
-        />
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title here</DialogTitle>
+          </DialogHeader>
+
+          <SubjectForm
+            subject={selectedSubject}
+            onSubmit={handleSubmit}
+            onCancel={() => setIsModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

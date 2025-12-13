@@ -1,3 +1,4 @@
+// src/hooks/useToast.js
 import toast from 'react-hot-toast'
 
 export const useToast = () => {

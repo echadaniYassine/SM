@@ -1,3 +1,4 @@
+// src/api/services/teachers.service.js
 import { api } from '../client'
 import { API_ENDPOINTS } from '@/config/routes.config'
 
