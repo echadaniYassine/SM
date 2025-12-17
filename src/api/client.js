@@ -32,18 +32,48 @@ api.interceptors.request.use(
     const storage = localStorage.getItem('auth-storage')
 
     if (storage) {
-      const parsed = JSON.parse(storage)
-      const token = parsed?.state?.token
+      try {
+        const parsed = JSON.parse(storage)
+        const token = parsed?.state?.token
 
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+          console.log('🔑 Token attached to request')
+        } else {
+          console.warn('⚠️ No token found in auth storage')
+        }
+      } catch (error) {
+        console.error('❌ Error parsing auth storage:', error)
       }
+    } else {
+      console.warn('⚠️ No auth storage found')
     }
 
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('❌ Request interceptor error:', error)
+    return Promise.reject(error)
+  }
 )
 
-
-api.interceptors.response.use((r) => r, handleApiError)
+// Enhanced response interceptor with better error logging
+api.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    // Enhanced error logging
+    if (error.config?.url?.includes('/student/')) {
+      console.error('❌ API Error:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.response?.data?.message || error.message,
+        data: error.response?.data
+      })
+    }
+    
+    return handleApiError(error)
+  }
+)

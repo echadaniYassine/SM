@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Loading from '@/components/ui/Loading'
+import { ErrorDisplay } from '@/components/ui/Loading'
 import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher } from '@/api/hooks/useTeachers'
 import TeacherList from '@/components/features/teachers/TeacherList'
 import TeacherForm from '@/components/forms/TeacherForm'
@@ -14,10 +16,14 @@ export default function TeachersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
 
-  const { data, isLoading } = useTeachers()
+  const { data, isLoading, error, refetch } = useTeachers()
   const { mutate: createTeacher } = useCreateTeacher()
   const { mutate: updateTeacher } = useUpdateTeacher()
   const { mutate: deleteTeacher } = useDeleteTeacher()
+
+  if (isLoading) return <Loading message="Loading teachers..." />
+  if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
+
 
   const handleSubmit = (data) => {
     if (selectedTeacher) {

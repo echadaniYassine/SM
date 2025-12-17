@@ -5,20 +5,21 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react'
 import { useAuth } from '@/api/hooks/useAuth'
-import { useToast } from '@/hooks/useToast'
+import { useToast } from '@/hooks/use-toast'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { CardContent, Card, CardHeader } from '@/components/ui/card'
-import ThemeToggle from '@/components/ui/theme-toggle'
-import LanguageSelector from '@/components/ui/language-selector'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { LanguageSelector } from '@/components/ui/language-selector'
 import { validate } from '@/utils/validators'
+import { getDashboardRoute } from '@/config/routes.config'
 
 export default function LoginPage() {
 
   const { t } = useTranslation()
   const { login, loading } = useAuth()
   const navigate = useNavigate()
-  const { showToast } = useToast()
+  const { toast } = useToast()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -55,21 +56,21 @@ export default function LoginPage() {
     try {
       const result = await login(formData)
 
-      showToast({
+      toast({
         title: t('common.success'),
         description: 'Welcome back!',
-        type: 'success'
+        variant: 'default'
       })
 
-      navigate('/dashboard')
+      navigate(getDashboardRoute(result.data.user.role))
 
     } catch (error) {
-      showToast({
+      toast({
         title: t('common.error'),
         description:
           error.response?.data?.message ||
           t('auth.invalidCredentials'),
-        type: 'error'
+        variant: 'destructive'
       })
     }
   }

@@ -65,3 +65,9 @@ export const useStudentSubjects = () => {
     queryFn: studentsService.mySubjects,
   })
 }
+export const useStudentDashboard = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.STUDENT_DASHBOARD || ['student', 'dashboard'],
+    queryFn: studentsService.myDashboard,
+  })
+}

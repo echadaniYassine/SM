@@ -4,8 +4,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 const ThemeContext = createContext({
   theme: 'light',
-  setTheme: () => {},
-  toggleTheme: () => {}
+  setTheme: () => { },
+  toggleTheme: () => { }
 })
 
 const THEMES = {
@@ -19,10 +19,10 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = window.document.documentElement
-    
+
     // Remove all theme classes
     root.classList.remove(THEMES.LIGHT, THEMES.DARK)
-    
+
     if (theme === THEMES.SYSTEM) {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? THEMES.DARK
@@ -37,15 +37,15 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (theme === THEMES.SYSTEM) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      
+
       const handleChange = (e) => {
         const root = window.document.documentElement
         root.classList.remove(THEMES.LIGHT, THEMES.DARK)
         root.classList.add(e.matches ? THEMES.DARK : THEMES.LIGHT)
       }
 
-      mediaQuery.addListener(handleChange)
-      return () => mediaQuery.removeListener(handleChange)
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
     }
   }, [theme])
 

@@ -1,28 +1,31 @@
 // src/pages/auth/Register.jsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { 
-  Eye, EyeOff, Mail, Lock, User, Calendar, 
-  UserPlus, Loader2, Check, ArrowRight 
+import {
+  Eye, EyeOff, Mail, Lock, User, Calendar,
+  UserPlus, Loader2, Check, ArrowRight, BookOpen
 } from 'lucide-react'
 import { useAuth } from '@/api/hooks/useAuth'
+import { usePrograms } from '@/api/hooks/usePrograms'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { CardContent, Card, CardHeader } from '@/components/ui/card'
-import  ThemeToggle  from '@/components/ui/theme-toggle'
-import  LanguageSelector  from '@/components/ui/language-selector'
-import { useToast } from '@/hooks/useToast'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { LanguageSelector } from '@/components/ui/language-selector'
+import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/utils/helpers'
+import { getDashboardRoute } from '@/config/routes.config'
 
 export default function RegisterPage() {
-  
+
   const { t } = useTranslation()
   const { register, loading } = useAuth()
+  const { data: programsData, isLoading: programsLoading } = usePrograms()
   const navigate = useNavigate()
-  const { showToast } = useToast()
-  
+  const { toast } = useToast()
+
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     // Guardian info
@@ -30,17 +33,20 @@ export default function RegisterPage() {
     guardian_email: '',
     guardian_password: '',
     guardian_password_confirmation: '',
-    
+
     // Student info
     student_name: '',
     student_date_of_birth: '',
     student_gender: '',
     student_email: '',
+    program_id: '', // ✅ ADDED
   })
-  
+
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
+
+  const programs = programsData?.data || []
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -53,46 +59,50 @@ export default function RegisterPage() {
 
   const validateStep1 = () => {
     const newErrors = {}
-    
+
     if (!formData.guardian_name.trim()) {
       newErrors.guardian_name = 'Guardian name is required'
     }
-    
+
     if (!formData.guardian_email) {
       newErrors.guardian_email = 'Email is required'
     } else if (!/\S+@\S+\.\S+/.test(formData.guardian_email)) {
       newErrors.guardian_email = 'Email is invalid'
     }
-    
+
     if (!formData.guardian_password) {
       newErrors.guardian_password = 'Password is required'
     } else if (formData.guardian_password.length < 8) {
       newErrors.guardian_password = 'Password must be at least 8 characters'
     }
-    
+
     if (formData.guardian_password !== formData.guardian_password_confirmation) {
       newErrors.guardian_password_confirmation = 'Passwords do not match'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const validateStep2 = () => {
     const newErrors = {}
-    
+
     if (!formData.student_name.trim()) {
       newErrors.student_name = 'Student name is required'
     }
-    
+
     if (!formData.student_date_of_birth) {
       newErrors.student_date_of_birth = 'Date of birth is required'
     }
-    
+
+    if (!formData.program_id) { // ✅ ADDED
+      newErrors.program_id = 'Please select a program'
+    }
+
     if (formData.student_email && !/\S+@\S+\.\S+/.test(formData.student_email)) {
       newErrors.student_email = 'Email is invalid'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -111,29 +121,49 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (currentStep === 1) {
       handleNext()
       return
     }
-    
+
     if (!validateStep2()) return
 
-    const result = await register(formData)
-    
-    if (result.success) {
-      showToast({
-        title: t('common.success'),
-        description: 'Account created successfully!',
-        type: 'success'
-      })
-      navigate('/dashboard')
-    } else {
-      showToast({
-        title: t('common.error'),
-        description: result.message,
-        type: 'error'
-      })
+    try {
+      const result = await register(formData)
+
+      if (result.success) {
+        toast({
+          title: t('common.success'),
+          description: result.message || 'Account created successfully!',
+          variant: 'default'
+        })
+        navigate(getDashboardRoute(result.data.guardian?.role || 'guardian'))
+      }
+    } catch (error) {
+      // ✅ IMPROVED: Handle backend validation errors
+      const backendErrors = error.response?.data?.errors
+
+      if (backendErrors) {
+        // Map backend validation errors to form fields
+        const mappedErrors = {}
+        Object.keys(backendErrors).forEach(key => {
+          mappedErrors[key] = backendErrors[key][0] // Get first error message
+        })
+        setErrors(mappedErrors)
+
+        toast({
+          title: t('common.error'),
+          description: 'Please check the form for errors',
+          variant: 'destructive'
+        })
+      } else {
+        toast({
+          title: t('common.error'),
+          description: error.response?.data?.message || 'Registration failed. Please try again.',
+          variant: 'destructive'
+        })
+      }
     }
   }
 
@@ -147,7 +177,7 @@ export default function RegisterPage() {
       {/* Background Animation */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -inset-10 opacity-50">
-          <motion.div 
+          <motion.div
             className="absolute top-1/4 right-1/4 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl dark:bg-green-600"
             animate={{
               x: [0, -100, 0],
@@ -159,7 +189,7 @@ export default function RegisterPage() {
               repeatType: "reverse",
             }}
           />
-          <motion.div 
+          <motion.div
             className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl dark:bg-blue-600"
             animate={{
               x: [0, 100, 0],
@@ -190,7 +220,7 @@ export default function RegisterPage() {
           <CardHeader className="space-y-1 pb-6">
             {/* Logo */}
             <div className="flex justify-center mb-6">
-              <motion.div 
+              <motion.div
                 className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -216,8 +246,8 @@ export default function RegisterPage() {
                     currentStep === step.number
                       ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2"
                       : step.completed
-                      ? "bg-green-500 text-white"
-                      : "bg-muted text-muted-foreground"
+                        ? "bg-green-500 text-white"
+                        : "bg-muted text-muted-foreground"
                   )}>
                     {step.completed ? (
                       <Check className="w-4 h-4" />
@@ -235,7 +265,7 @@ export default function RegisterPage() {
               ))}
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {currentStep === 1 && (
@@ -261,7 +291,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.guardian_name && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -286,7 +316,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.guardian_email && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -318,7 +348,7 @@ export default function RegisterPage() {
                       </button>
                     </div>
                     {errors.guardian_password && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -350,7 +380,7 @@ export default function RegisterPage() {
                       </button>
                     </div>
                     {errors.guardian_password_confirmation && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -385,7 +415,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_name && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -409,7 +439,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_date_of_birth && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -434,9 +464,42 @@ export default function RegisterPage() {
                     </select>
                   </div>
 
+                  {/* ✅ ADDED: Program Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Program *</label>
+                    <div className="relative">
+                      <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <select
+                        name="program_id"
+                        value={formData.program_id}
+                        onChange={handleChange}
+                        className={`flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${errors.program_id ? 'border-red-500' : ''}`}
+                        disabled={programsLoading}
+                      >
+                        <option value="">
+                          {programsLoading ? 'Loading programs...' : 'Select a program'}
+                        </option>
+                        {programs.map((program) => (
+                          <option key={program.id} value={program.id}>
+                            {program.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.program_id && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-sm text-red-500"
+                      >
+                        {errors.program_id}
+                      </motion.p>
+                    )}
+                  </div>
+
                   {/* Student Email (Optional) */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('auth.studentEmail')}</label>
+                    <label className="text-sm font-medium">{t('auth.studentEmail')} (optional)</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
@@ -449,7 +512,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_email && (
-                      <motion.p 
+                      <motion.p
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-sm text-red-500"
@@ -499,8 +562,8 @@ export default function RegisterPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 {t('auth.hasAccount')}{' '}
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 font-medium"
                 >
                   {t('auth.signIn')}

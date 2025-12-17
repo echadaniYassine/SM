@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Loading from '@/components/ui/Loading'
+import { ErrorDisplay } from '@/components/ui/Loading'
 import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from '@/api/hooks/useStudents'
 import StudentList from '@/components/features/students/StudentList'
 import StudentForm from '@/components/forms/StudentForm'
@@ -14,10 +16,13 @@ export default function StudentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
 
-  const { data, isLoading } = useStudents()
+  const { data, isLoading, error, refetch } = useStudents()
   const { mutate: createStudent } = useCreateStudent()
   const { mutate: updateStudent } = useUpdateStudent()
   const { mutate: deleteStudent } = useDeleteStudent()
+
+  if (isLoading) return <Loading message="Loading students..." />
+  if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
 
   const handleSubmit = (data) => {
     if (selectedStudent) {

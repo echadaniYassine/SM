@@ -29,14 +29,19 @@ export const studentsService = {
     return response.data
   },
 
-  // ✅ NEW: Student-specific endpoints
+  // ✅ Student-specific endpoints - Use API_ENDPOINTS
+  myDashboard: async () => {
+    const response = await api.get(API_ENDPOINTS.STUDENT.DASHBOARD)
+    return response.data
+  },
+
   myTimetable: async () => {
-    const response = await api.get('/student/timetable')
+    const response = await api.get(API_ENDPOINTS.STUDENT.TIMETABLE)
     return response.data
   },
 
   mySubjects: async () => {
-    const response = await api.get('/student/subjects')
+    const response = await api.get(API_ENDPOINTS.STUDENT.SUBJECTS)
     return response.data
   },
 }

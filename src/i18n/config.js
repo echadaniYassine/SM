@@ -12,8 +12,9 @@ const resources = {
         programs: 'Programs',
         students: 'Students',
         teachers: 'Teachers',
-        schedule: 'Schedule',
+        timetables: 'timetables',
         guardians: 'Guardians',
+        subjects: 'Subjects',
         registrations: 'Registrations',
         profile: 'Profile',
         logout: 'Logout'
@@ -191,6 +192,8 @@ const resources = {
         students: 'Étudiants',
         teachers: 'Enseignants',
         guardians: 'Tuteurs',
+        timetables: 'Emplois du temps',
+        subjects: 'Matières',
         registrations: 'Inscriptions',
         profile: 'Profil',
         logout: 'Déconnexion'
@@ -369,6 +372,8 @@ const resources = {
         students: 'الطلاب',
         teachers: 'المعلمين',
         guardians: 'أولياء الأمور',
+        timetables: 'الجداول الزمنية',
+        subjects: 'المواد',
         registrations: 'التسجيلات',
         profile: 'الملف الشخصي',
         logout: 'تسجيل الخروج'

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Loading from '@/components/ui/Loading'
+import { ErrorDisplay } from '@/components/ui/Loading'
 import { useTimetables, useCreateTimetable, useUpdateTimetable, useDeleteTimetable } from '@/api/hooks/useTimetable'
 import TimetableForm from '@/components/forms/TimetableForm'
 import {
@@ -13,10 +15,13 @@ export default function TimetablePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTimetable, setSelectedTimetable] = useState(null)
 
-  const { data, isLoading } = useTimetables()
+  const { data, isLoading, error, refetch } = useTimetables()
   const { mutate: createTimetable } = useCreateTimetable()
   const { mutate: updateTimetable } = useUpdateTimetable()
   const { mutate: deleteTimetable } = useDeleteTimetable()
+
+  if (isLoading) return <Loading message="Loading timetable..." />
+  if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
 
   const handleSubmit = (data) => {
     if (selectedTimetable) {
@@ -28,13 +33,14 @@ export default function TimetablePage() {
     setSelectedTimetable(null)
   }
 
+  const timetables = data?.data || data || []
   return (
     <div>
       <h1>Timetable Management</h1>
       <button onClick={() => setIsModalOpen(true)}>Add Timetable Entry</button>
 
       <div>
-        {data?.data?.data?.map((timetable) => (
+        {timetables.map((timetable) => (
           <div key={timetable.id}>
             <p>
               {timetable.day_name}: {timetable.start_time} - {timetable.end_time}

@@ -51,13 +51,13 @@ export function Layout({ children }) {
         return [
           { name: t('nav.dashboard'), href: '/teacher/dashboard', icon: Home },
           { name: t('nav.subjects'), href: '/teacher/subjects', icon: BookOpen },
-          { name: t('nav.timetable'), href: '/teacher/timetable', icon: Calendar },
+          { name: t('nav.timetables'), href: '/teacher/timetable', icon: Calendar },
         ]
 
       case 'student':
         return [
           { name: t('nav.dashboard'), href: '/student/dashboard', icon: Home },
-          { name: t('nav.timetable'), href: '/student/timetable', icon: Calendar },
+          { name: t('nav.timetables'), href: '/student/timetable', icon: Calendar },
           { name: t('nav.subjects'), href: '/student/subjects', icon: BookOpen },
         ]
 

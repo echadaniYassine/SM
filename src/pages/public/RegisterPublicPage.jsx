@@ -1,5 +1,5 @@
 import { useCreateRegistration } from '@/api/hooks/useRegistrations'
-import RegistrationForm from '@/components/features/registrations/RegistrationForm'
+import RegistrationForm from '@/components/forms/RegistrationForm'
 
 export default function RegisterPublicPage() {
   const { mutate: createRegistration } = useCreateRegistration()

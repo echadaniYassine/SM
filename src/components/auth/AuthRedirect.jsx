@@ -13,7 +13,7 @@ export const AuthRedirect = ({ children }) => {
       teacher: '/teacher/dashboard',
       student: '/student/dashboard',
     }
-    return <Navigate to={roleRoutes[user?.role] || '/dashboard'} replace />
+    return <Navigate to={roleRoutes[user?.role] || '/'} replace />
   }
 
   return children

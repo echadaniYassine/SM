@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import Loading from '@/components/ui/Loading'
+import { ErrorDisplay } from '@/components/ui/Loading'
 import { usePrograms, useCreateProgram, useUpdateProgram, useDeleteProgram } from '@/api/hooks/usePrograms'
 import ProgramForm from '@/components/forms/ProgramForm'
 import {
@@ -13,10 +15,13 @@ export default function ProgramsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProgram, setSelectedProgram] = useState(null)
 
-  const { data, isLoading } = usePrograms()
+  const { data, isLoading, error, refetch } = usePrograms()
   const { mutate: createProgram } = useCreateProgram()
   const { mutate: updateProgram } = useUpdateProgram()
   const { mutate: deleteProgram } = useDeleteProgram()
+
+  if (isLoading) return <Loading message="Loading programs..." />
+  if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
 
   const handleSubmit = (data) => {
     if (selectedProgram) {
@@ -27,6 +32,8 @@ export default function ProgramsPage() {
     setIsModalOpen(false)
     setSelectedProgram(null)
   }
+  const programs = data?.data || data || [] // Add this line
+
 
   return (
     <div>
@@ -34,7 +41,7 @@ export default function ProgramsPage() {
       <button onClick={() => setIsModalOpen(true)}>Add Program</button>
 
       <div>
-        {data?.data?.data?.map((program) => (
+        {programs.map((program) => (
           <div key={program.id}>
             <h3>{program.name}</h3>
             <p>{program.description}</p>

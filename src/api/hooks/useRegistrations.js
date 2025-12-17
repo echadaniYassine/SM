@@ -1,3 +1,8 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { QUERY_KEYS } from '@/config/routes.config'
+import toast from 'react-hot-toast'
+import { registrationsService } from '../services/registrations.service'
+
 export const useRegistrations = (params = {}) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.ADMIN_REGISTRATIONS, params],
