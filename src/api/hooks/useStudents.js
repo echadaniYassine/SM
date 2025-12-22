@@ -20,6 +20,7 @@ export const useStudent = (id) => {
 
 export const useCreateStudent = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: studentsService.create,
     onSuccess: () => {
@@ -31,11 +32,12 @@ export const useCreateStudent = () => {
 
 export const useUpdateStudent = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: ({ id, data }) => studentsService.update(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENTS })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENT(variables.id) })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENT(id) })
       toast.success('Student updated')
     },
   })
@@ -43,14 +45,17 @@ export const useUpdateStudent = () => {
 
 export const useDeleteStudent = () => {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: studentsService.delete,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENTS })
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.ADMIN_STUDENT(id) })
       toast.success('Student deleted')
     },
   })
 }
+
 
 export const useStudentTimetable = () => {
   return useQuery({
@@ -65,9 +70,25 @@ export const useStudentSubjects = () => {
     queryFn: studentsService.mySubjects,
   })
 }
+
 export const useStudentDashboard = () => {
   return useQuery({
-    queryKey: QUERY_KEYS.STUDENT_DASHBOARD || ['student', 'dashboard'],
+    queryKey: QUERY_KEYS.STUDENT_DASHBOARD,
     queryFn: studentsService.myDashboard,
   })
 }
+
+export const useStudentClass = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.STUDENT_CLASS,
+    queryFn: studentsService.myClass,
+  })
+}
+
+export const useStudentClassmates = () => {
+  return useQuery({
+    queryKey: QUERY_KEYS.STUDENT_CLASSMATES,
+    queryFn: studentsService.myClassmates,
+  })
+}
+

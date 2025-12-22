@@ -23,7 +23,7 @@ import ProgramsPage from '@/pages/admin/ProgramsPage'
 import SubjectsPage from '@/pages/admin/SubjectsPage'
 import TimetablePage from '@/pages/admin/TimetablePage'
 import RegistrationsPage from '@/pages/admin/RegistrationsPage'
-
+import SchoolClassesPage from '@/pages/admin/SchoolClassesPage'
 // Guardian Pages
 import GuardianDashboardPage from '@/pages/guardian/GuardianDashboardPage'
 import MyStudentsPage from '@/pages/guardian/MyStudentsPage'
@@ -47,201 +47,218 @@ import PublicRegisterPage from '@/pages/public/RegisterPublicPage'
 import ProfilePage from '@/pages/ProfilePage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
-export const router = createBrowserRouter([
-  // ============================================
-  // Public Routes (No Authentication)
-  // ============================================
+export const router = createBrowserRouter(
+  [
+    // ============================================
+    // Public Routes (No Authentication)
+    // ============================================
+    {
+      path: '/',
+      element: <HomePage />,
+    },
+    {
+      path: '/programs',
+      element: <PublicProgramsPage />,
+    },
+    {
+      path: '/register-public',
+      element: <RegisterPage />,
+    },
+
+    // ============================================
+    // Auth Routes (Redirect if already logged in)
+    // ============================================
+    {
+      element: <AuthLayout />,
+      children: [
+        {
+          path: '/login',
+          element: (
+            <AuthRedirect>
+              <LoginPage />
+            </AuthRedirect>
+          ),
+        },
+        {
+          path: '/register',
+          element: (
+            <AuthRedirect>
+              <RegisterPage />
+            </AuthRedirect>
+          ),
+        },
+        {
+          path: '/forgot-password',
+          element: <ForgotPasswordPage />,
+        },
+        {
+          path: '/reset-password',
+          element: <ResetPasswordPage />,
+        },
+      ],
+    },
+
+    // ============================================
+    // Protected Routes (Authentication Required)
+    // ============================================
+    {
+      element: (
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      ),
+      children: [
+        // ============================================
+        // Admin Routes
+        // ============================================
+        {
+          path: '/admin',
+          element: <RoleGuard allowedRoles={['admin']} />,
+          children: [
+            {
+              path: '',
+              element: <Navigate to="/admin/dashboard" replace />,
+            },
+            {
+              path: 'dashboard',
+              element: <AdminDashboardPage />,
+            },
+            {
+              path: 'students',
+              element: <StudentsPage />,
+            },
+            {
+              path: 'teachers',
+              element: <TeachersPage />,
+            },
+            {
+              path: 'guardians',
+              element: <GuardiansPage />,
+            },
+            {
+              path: 'programs',
+              element: <ProgramsPage />,
+            },
+            {
+              path: 'subjects',
+              element: <SubjectsPage />,
+            },
+            {
+              path: 'timetables',
+              element: <TimetablePage />,
+            },
+            {
+              path: 'registrations',
+              element: <RegistrationsPage />,
+            },
+            {
+              path: 'classes',
+              element: <SchoolClassesPage />,
+            }
+          ],
+        },
+
+        // ============================================
+        // Guardian Routes
+        // ============================================
+        {
+          path: '/guardian',
+          element: <RoleGuard allowedRoles={['guardian']} />,
+          children: [
+            {
+              path: '',
+              element: <Navigate to="/guardian/dashboard" replace />,
+            },
+            {
+              path: 'dashboard',
+              element: <GuardianDashboardPage />,
+            },
+            {
+              path: 'students',
+              element: <MyStudentsPage />,
+            },
+          ],
+        },
+
+        // ============================================
+        // Teacher Routes
+        // ============================================
+        {
+          path: '/teacher',
+          element: <RoleGuard allowedRoles={['teacher']} />,
+          children: [
+            {
+              path: '',
+              element: <Navigate to="/teacher/dashboard" replace />,
+            },
+            {
+              path: 'dashboard',
+              element: <TeacherDashboardPage />,
+            },
+            {
+              path: 'subjects',
+              element: <MySubjectsPage />,
+            },
+            {
+              path: 'timetable',
+              element: <MyTimetablePage />,
+            },
+          ],
+        },
+
+        // ============================================
+        // Student Routes
+        // ============================================
+        {
+          path: '/student',
+          element: <RoleGuard allowedRoles={['student']} />,
+          children: [
+            {
+              path: '',
+              element: <Navigate to="/student/dashboard" replace />,
+            },
+            {
+              path: 'dashboard',
+              element: <StudentDashboardPage />,
+            },
+            {
+              path: 'timetable',
+              element: <StudentTimetablePage />,
+            },
+            {
+              path: 'subjects',
+              element: <StudentSubjectsPage />,
+            },
+          ],
+        },
+
+        // ============================================
+        // Shared Authenticated Routes
+        // ============================================
+        {
+          path: '/profile',
+          element: <ProfilePage />,
+        },
+      ],
+    },
+
+    // ============================================
+    // 404 Not Found
+    // ============================================
+    {
+      path: '*',
+      element: <NotFoundPage />,
+    },
+  ],
   {
-    path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/programs',
-    element: <PublicProgramsPage />,
-  },
-  {
-    path: '/register-public',
-    element: <RegisterPage />,
-  },
-
-  // ============================================
-  // Auth Routes (Redirect if already logged in)
-  // ============================================
-  {
-    element: <AuthLayout />,
-    children: [
-      {
-        path: '/login',
-        element: (
-          <AuthRedirect>
-            <LoginPage />
-          </AuthRedirect>
-        ),
-      },
-      {
-        path: '/register',
-        element: (
-          <AuthRedirect>
-            <RegisterPage />
-          </AuthRedirect>
-        ),
-      },
-      {
-        path: '/forgot-password',
-        element: <ForgotPasswordPage />,
-      },
-      {
-        path: '/reset-password',
-        element: <ResetPasswordPage />,
-      },
-    ],
-  },
-
-  // ============================================
-  // Protected Routes (Authentication Required)
-  // ============================================
-  {
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      // ============================================
-      // Admin Routes
-      // ============================================
-      {
-        path: '/admin',
-        element: <RoleGuard allowedRoles={['admin']} />,
-        children: [
-          {
-            path: '',
-            element: <Navigate to="/admin/dashboard" replace />,
-          },
-          {
-            path: 'dashboard',
-            element: <AdminDashboardPage />,
-          },
-          {
-            path: 'students',
-            element: <StudentsPage />,
-          },
-          {
-            path: 'teachers',
-            element: <TeachersPage />,
-          },
-          {
-            path: 'guardians',
-            element: <GuardiansPage />,
-          },
-          {
-            path: 'programs',
-            element: <ProgramsPage />,
-          },
-          {
-            path: 'subjects',
-            element: <SubjectsPage />,
-          },
-          {
-            path: 'timetables',
-            element: <TimetablePage />,
-          },
-          {
-            path: 'registrations',
-            element: <RegistrationsPage />,
-          },
-        ],
-      },
-
-      // ============================================
-      // Guardian Routes
-      // ============================================
-      {
-        path: '/guardian',
-        element: <RoleGuard allowedRoles={['guardian']} />,
-        children: [
-          {
-            path: '',
-            element: <Navigate to="/guardian/dashboard" replace />,
-          },
-          {
-            path: 'dashboard',
-            element: <GuardianDashboardPage />,
-          },
-          {
-            path: 'students',
-            element: <MyStudentsPage />,
-          },
-        ],
-      },
-
-      // ============================================
-      // Teacher Routes
-      // ============================================
-      {
-        path: '/teacher',
-        element: <RoleGuard allowedRoles={['teacher']} />,
-        children: [
-          {
-            path: '',
-            element: <Navigate to="/teacher/dashboard" replace />,
-          },
-          {
-            path: 'dashboard',
-            element: <TeacherDashboardPage />,
-          },
-          {
-            path: 'subjects',
-            element: <MySubjectsPage />,
-          },
-          {
-            path: 'timetable',
-            element: <MyTimetablePage />,
-          },
-        ],
-      },
-
-      // ============================================
-      // Student Routes
-      // ============================================
-      {
-        path: '/student',
-        element: <RoleGuard allowedRoles={['student']} />,
-        children: [
-          {
-            path: '',
-            element: <Navigate to="/student/dashboard" replace />,
-          },
-          {
-            path: 'dashboard',
-            element: <StudentDashboardPage />,
-          },
-          {
-            path: 'timetable',
-            element: <StudentTimetablePage />,
-          },
-          {
-            path: 'subjects',
-            element: <StudentSubjectsPage />,
-          },
-        ],
-      },
-
-      // ============================================
-      // Shared Authenticated Routes
-      // ============================================
-      {
-        path: '/profile',
-        element: <ProfilePage />,
-      },
-    ],
-  },
-
-  // ============================================
-  // 404 Not Found
-  // ============================================
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
-])
+    // ✅ Future flags to eliminate React Router v7 warnings
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+    }
+  }
+)

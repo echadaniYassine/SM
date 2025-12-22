@@ -21,6 +21,7 @@ export const ROUTE_PATHS = {
     SUBJECTS: '/admin/subjects',
     TIMETABLES: '/admin/timetables',
     REGISTRATIONS: '/admin/registrations',
+    CLASSES: '/admin/classes',
   },
 
   // Guardian routes
@@ -93,7 +94,11 @@ export const API_ENDPOINTS = {
     DASHBOARD: '/student/dashboard',
     SUBJECTS: '/student/subjects',
     TIMETABLE: '/student/timetable',
+    MY_CLASS: '/student/my-class',
+    CLASSMATES: '/student/classmates',
   },
+  
+
 }
 
 // ============================================
@@ -109,6 +114,8 @@ export const QUERY_KEYS = {
   ADMIN_PROGRAMS: ['admin', 'programs'],
   ADMIN_SUBJECTS: ['admin', 'subjects'],
   ADMIN_REGISTRATIONS: ['admin', 'registrations'],
+  ADMIN_CLASSES: ['admin', 'classes'],
+
   ADMIN_TIMETABLES: (programId) =>
     programId ? ['admin', 'timetables', programId] : ['admin', 'timetables'],
 
@@ -120,7 +127,7 @@ export const QUERY_KEYS = {
   ADMIN_SUBJECT: (id) => ['admin', 'subject', id],
   ADMIN_TIMETABLE: (id) => ['admin', 'timetable', id],
   ADMIN_REGISTRATION: (id) => ['admin', 'registration', id],
-
+  ADMIN_CLASS: (id) => ['admin', 'class', id],
   // Guardian queries
   GUARDIAN_DASHBOARD: ['guardian', 'dashboard'],
   GUARDIAN_STUDENTS: ['guardian', 'students'],
@@ -135,6 +142,8 @@ export const QUERY_KEYS = {
   STUDENT_DASHBOARD: ['student', 'dashboard'],
   STUDENT_SUBJECTS: ['student', 'subjects'],
   STUDENT_TIMETABLE: ['student', 'timetable'],
+  STUDENT_CLASS: ['student', 'class'],
+  STUDENT_CLASSMATES: ['student', 'classmates'],
 
   // Shared/Public queries
   PROGRAMS: ['programs'],

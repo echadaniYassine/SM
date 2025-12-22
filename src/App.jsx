@@ -11,10 +11,17 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,     // Keep unused data for 10 minutes
+      refetchOnReconnect: true,      // Refetch when internet reconnects
     },
+    mutations: {
+      retry: 0,                      // Don't retry failed mutations
+      onError: (error) => {
+        console.error('Mutation error:', error)
+      }
+    }
   },
 })
-
 function App() {
   return (
     <ThemeProvider>

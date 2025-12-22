@@ -1,17 +1,19 @@
 // src/pages/auth/Register.jsx
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   Eye, EyeOff, Mail, Lock, User, Calendar,
-  UserPlus, Loader2, Check, ArrowRight, BookOpen
+  UserPlus, Loader2, Check, ArrowRight, BookOpen,
+  GraduationCap, FileText
 } from 'lucide-react'
 import { useAuth } from '@/api/hooks/useAuth'
 import { usePrograms } from '@/api/hooks/usePrograms'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { CardContent, Card, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { LanguageSelector } from '@/components/ui/language-selector'
 import { useToast } from '@/hooks/use-toast'
@@ -19,7 +21,6 @@ import { cn } from '@/utils/helpers'
 import { getDashboardRoute } from '@/config/routes.config'
 
 export default function RegisterPage() {
-
   const { t } = useTranslation()
   const { register, loading } = useAuth()
   const { data: programsData, isLoading: programsLoading } = usePrograms()
@@ -28,30 +29,39 @@ export default function RegisterPage() {
 
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
-    // Guardian info
+    // Step 1: Guardian info
     guardian_name: '',
     guardian_email: '',
     guardian_password: '',
     guardian_password_confirmation: '',
 
-    // Student info
+    // Step 2: Student info
     student_name: '',
     student_date_of_birth: '',
     student_gender: '',
     student_email: '',
-    program_id: '', // ✅ ADDED
+
+    // Step 3: Program enrollment
+    program_id: '',
   })
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
+  const [selectedProgram, setSelectedProgram] = useState(null)
 
   const programs = programsData?.data || []
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    // Clear error when user starts typing
+    
+    // Update selected program when program_id changes
+    if (name === 'program_id') {
+      const program = programs.find(p => p.id === parseInt(value))
+      setSelectedProgram(program)
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -95,8 +105,8 @@ export default function RegisterPage() {
       newErrors.student_date_of_birth = 'Date of birth is required'
     }
 
-    if (!formData.program_id) { // ✅ ADDED
-      newErrors.program_id = 'Please select a program'
+    if (!formData.student_gender) {
+      newErrors.student_gender = 'Gender is required'
     }
 
     if (formData.student_email && !/\S+@\S+\.\S+/.test(formData.student_email)) {
@@ -107,15 +117,28 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0
   }
 
+  const validateStep3 = () => {
+    const newErrors = {}
+
+    if (!formData.program_id) {
+      newErrors.program_id = 'Please select a program'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
       setCurrentStep(2)
+    } else if (currentStep === 2 && validateStep2()) {
+      setCurrentStep(3)
     }
   }
 
   const handleBack = () => {
-    if (currentStep === 2) {
-      setCurrentStep(1)
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
     }
   }
 
@@ -127,7 +150,14 @@ export default function RegisterPage() {
       return
     }
 
-    if (!validateStep2()) return
+    if (currentStep === 2) {
+      handleNext()
+      return
+    }
+
+    if (currentStep === 3 && !validateStep3()) {
+      return
+    }
 
     try {
       const result = await register(formData)
@@ -135,20 +165,18 @@ export default function RegisterPage() {
       if (result.success) {
         toast({
           title: t('common.success'),
-          description: result.message || 'Account created successfully!',
+          description: result.message || 'Account created and student enrolled successfully!',
           variant: 'default'
         })
         navigate(getDashboardRoute(result.data.guardian?.role || 'guardian'))
       }
     } catch (error) {
-      // ✅ IMPROVED: Handle backend validation errors
       const backendErrors = error.response?.data?.errors
 
       if (backendErrors) {
-        // Map backend validation errors to form fields
         const mappedErrors = {}
         Object.keys(backendErrors).forEach(key => {
-          mappedErrors[key] = backendErrors[key][0] // Get first error message
+          mappedErrors[key] = backendErrors[key][0]
         })
         setErrors(mappedErrors)
 
@@ -169,7 +197,8 @@ export default function RegisterPage() {
 
   const steps = [
     { number: 1, title: t('auth.guardianInfo'), completed: currentStep > 1 },
-    { number: 2, title: t('auth.studentInfo'), completed: false },
+    { number: 2, title: t('auth.studentInfo'), completed: currentStep > 2 },
+    { number: 3, title: 'Program Enrollment', completed: false },
   ]
 
   return (
@@ -214,7 +243,7 @@ export default function RegisterPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-2xl"
       >
         <Card className="backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 shadow-2xl border-0">
           <CardHeader className="space-y-1 pb-6">
@@ -238,11 +267,11 @@ export default function RegisterPage() {
             </p>
 
             {/* Step Indicator */}
-            <div className="flex items-center justify-center space-x-4 mt-6">
+            <div className="flex items-center justify-center space-x-2 mt-6">
               {steps.map((step, index) => (
                 <div key={step.number} className="flex items-center">
                   <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300",
+                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300",
                     currentStep === step.number
                       ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2"
                       : step.completed
@@ -250,16 +279,16 @@ export default function RegisterPage() {
                         : "bg-muted text-muted-foreground"
                   )}>
                     {step.completed ? (
-                      <Check className="w-4 h-4" />
+                      <Check className="w-5 h-5" />
                     ) : (
                       step.number
                     )}
                   </div>
-                  <span className="ml-2 text-sm font-medium hidden sm:inline">
+                  <span className="ml-2 text-xs font-medium hidden md:inline">
                     {step.title}
                   </span>
                   {index < steps.length - 1 && (
-                    <ArrowRight className="w-4 h-4 text-muted-foreground mx-2" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground mx-2 hidden md:inline" />
                   )}
                 </div>
               ))}
@@ -268,6 +297,7 @@ export default function RegisterPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Step 1: Guardian Info */}
               {currentStep === 1 && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -276,7 +306,6 @@ export default function RegisterPage() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4"
                 >
-                  {/* Guardian Name */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.guardianName')}</label>
                     <div className="relative">
@@ -291,17 +320,12 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.guardian_name && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.guardian_name}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Guardian Email */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.guardianEmail')}</label>
                     <div className="relative">
@@ -316,17 +340,12 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.guardian_email && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.guardian_email}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Guardian Password */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.guardianPassword')}</label>
                     <div className="relative">
@@ -348,17 +367,12 @@ export default function RegisterPage() {
                       </button>
                     </div>
                     {errors.guardian_password && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.guardian_password}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.confirmPassword')}</label>
                     <div className="relative">
@@ -380,11 +394,7 @@ export default function RegisterPage() {
                       </button>
                     </div>
                     {errors.guardian_password_confirmation && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.guardian_password_confirmation}
                       </motion.p>
                     )}
@@ -392,6 +402,7 @@ export default function RegisterPage() {
                 </motion.div>
               )}
 
+              {/* Step 2: Student Info */}
               {currentStep === 2 && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -400,7 +411,6 @@ export default function RegisterPage() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4"
                 >
-                  {/* Student Name */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.studentName')}</label>
                     <div className="relative">
@@ -415,17 +425,12 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_name && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.student_name}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Date of Birth */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.studentDateOfBirth')}</label>
                     <div className="relative">
@@ -439,67 +444,33 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_date_of_birth && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.student_date_of_birth}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Gender */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('auth.studentGender')}</label>
                     <select
                       name="student_gender"
                       value={formData.student_gender}
                       onChange={handleChange}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${errors.student_gender ? 'border-red-500' : ''}`}
                     >
                       <option value="">Select gender</option>
                       <option value="male">{t('auth.male')}</option>
                       <option value="female">{t('auth.female')}</option>
                     </select>
-                  </div>
-
-                  {/* ✅ ADDED: Program Selection */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Program *</label>
-                    <div className="relative">
-                      <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <select
-                        name="program_id"
-                        value={formData.program_id}
-                        onChange={handleChange}
-                        className={`flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${errors.program_id ? 'border-red-500' : ''}`}
-                        disabled={programsLoading}
-                      >
-                        <option value="">
-                          {programsLoading ? 'Loading programs...' : 'Select a program'}
-                        </option>
-                        {programs.map((program) => (
-                          <option key={program.id} value={program.id}>
-                            {program.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {errors.program_id && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
-                        {errors.program_id}
+                    {errors.student_gender && (
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
+                        {errors.student_gender}
                       </motion.p>
                     )}
                   </div>
 
-                  {/* Student Email (Optional) */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('auth.studentEmail')} (optional)</label>
+                    <label className="text-sm font-medium">{t('auth.studentEmail')} (Optional)</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
@@ -512,11 +483,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     {errors.student_email && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-500">
                         {errors.student_email}
                       </motion.p>
                     )}
@@ -524,9 +491,111 @@ export default function RegisterPage() {
                 </motion.div>
               )}
 
+              {/* Step 3: Program Enrollment */}
+              {currentStep === 3 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <GraduationCap className="w-16 h-16 mx-auto text-primary" />
+                    <h3 className="text-xl font-semibold">Choose a Program</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Select the academic program for {formData.student_name || 'the student'}
+                    </p>
+                  </div>
+
+                  {programsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      <span className="ml-2 text-muted-foreground">Loading programs...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {programs.map((program) => (
+                        <motion.div
+                          key={program.id}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleChange({ target: { name: 'program_id', value: program.id.toString() }})}
+                            className={cn(
+                              "w-full p-4 rounded-lg border-2 text-left transition-all",
+                              formData.program_id === program.id.toString()
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/50"
+                            )}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <BookOpen className="w-5 h-5 text-primary" />
+                                  <h4 className="font-semibold">{program.name}</h4>
+                                  {formData.program_id === program.id.toString() && (
+                                    <Check className="w-5 h-5 text-primary ml-auto" />
+                                  )}
+                                </div>
+                                {program.description && (
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {program.description}
+                                  </p>
+                                )}
+                                <div className="flex gap-2 mt-3">
+                                  {program.students_count !== undefined && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {program.students_count} students
+                                    </Badge>
+                                  )}
+                                  {program.subjects_count !== undefined && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {program.subjects_count} subjects
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {errors.program_id && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-red-500 text-center"
+                    >
+                      {errors.program_id}
+                    </motion.p>
+                  )}
+
+                  {selectedProgram && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-muted rounded-lg"
+                    >
+                      <div className="flex items-start gap-3">
+                        <FileText className="w-5 h-5 text-primary mt-0.5" />
+                        <div>
+                          <p className="font-medium text-sm">Selected Program:</p>
+                          <p className="text-sm text-muted-foreground">{selectedProgram.name}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
               {/* Form Actions */}
               <div className="flex flex-col gap-3 mt-6">
-                {currentStep === 1 ? (
+                {currentStep < 3 ? (
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
@@ -547,14 +616,25 @@ export default function RegisterPage() {
                     <Button
                       type="submit"
                       className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                      disabled={loading}
+                      disabled={loading || !formData.program_id}
                     >
                       {loading ? (
                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       ) : null}
-                      {t('auth.signUp')}
+                      Complete Registration
                     </Button>
                   </div>
+                )}
+
+                {currentStep > 1 && currentStep < 3 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBack}
+                    className="w-full"
+                  >
+                    Back
+                  </Button>
                 )}
               </div>
             </form>

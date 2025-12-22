@@ -1,32 +1,47 @@
+// src/components/features/teachers/TeacherList.jsx
 import { useTeachers } from '@/api/hooks/useTeachers'
+import TeacherCard from './TeacherCard'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2 } from 'lucide-react'
 
-export default function TeacherList() {
+export default function TeacherList({ onTeacherClick }) {
   const { data, isLoading, error } = useTeachers()
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error loading teachers</div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
-  // Debug: Check what data structure you're getting
-  console.log('Teachers data:', data)
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Error loading teachers: {error.message}</AlertDescription>
+      </Alert>
+    )
+  }
 
-  // The service already returns response.data, so it's likely:
-  // Option 1: data.data (if API wraps in { data: [...] })
-  // Option 2: just data (if API returns array directly)
-  
   const teachers = data?.data || data || []
 
   if (teachers.length === 0) {
-    return <div>No teachers found</div>
+    return (
+      <Alert>
+        <AlertDescription>No teachers found. Click "Add Teacher" to create one.</AlertDescription>
+      </Alert>
+    )
   }
 
   return (
-    <div>
-      <h2>Teachers</h2>
-      <ul>
-        {teachers.map((teacher) => (
-          <li key={teacher.id}>{teacher.name}</li>
-        ))}
-      </ul>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {teachers.map((teacher) => (
+        <TeacherCard
+          key={teacher.id}
+          teacher={teacher}
+          onClick={() => onTeacherClick?.(teacher)}
+        />
+      ))}
     </div>
   )
 }

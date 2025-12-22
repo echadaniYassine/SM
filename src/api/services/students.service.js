@@ -44,4 +44,15 @@ export const studentsService = {
     const response = await api.get(API_ENDPOINTS.STUDENT.SUBJECTS)
     return response.data
   },
+
+  myClass: async () => {
+  const response = await api.get(API_ENDPOINTS.STUDENT.MY_CLASS)
+  return response.data
+},
+
+myClassmates: async () => {
+  const response = await api.get(API_ENDPOINTS.STUDENT.CLASSMATES)
+  return response.data
+},
+
 }

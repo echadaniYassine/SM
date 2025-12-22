@@ -1,7 +1,8 @@
+// src/pages/admin/RegistrationsPage.jsx
+import { useState } from 'react'
 import { useRegistrations, useUpdateRegistrationStatus } from '@/api/hooks/useRegistrations'
 import RegistrationList from '@/components/features/registrations/RegistrationList'
 import RegistrationFilters from '@/components/features/registrations/RegistrationFilters'
-import { useState } from 'react'
 import Loading from '@/components/ui/Loading'
 import { ErrorDisplay } from '@/components/ui/Loading'
 
@@ -13,26 +14,28 @@ export default function RegistrationsPage() {
   if (isLoading) return <Loading message="Loading registrations..." />
   if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
 
-  const registrations = data?.data || data || []
+  const registrations = data?.data || []
 
   const handleApprove = (id) => {
-    if (confirm('Are you sure you want to approve this registration?')) {
-      updateStatus({ id, statusData: { status: 'confirmed' } })
-    }
+    updateStatus({ id, statusData: { status: 'confirmed' } })
   }
 
   const handleReject = (id) => {
-    if (confirm('Are you sure you want to reject this registration?')) {
-      updateStatus({ id, statusData: { status: 'rejected' } })
-    }
+    updateStatus({ id, statusData: { status: 'rejected' } })
   }
 
   return (
-    <div>
-      <h1>Registrations Management</h1>
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Registrations</h1>
+        <p className="text-muted-foreground">Review and manage student registration requests</p>
+      </div>
 
+      {/* Filters */}
       <RegistrationFilters onFilterChange={setFilters} />
 
+      {/* List */}
       <RegistrationList
         registrations={registrations}
         onApprove={handleApprove}

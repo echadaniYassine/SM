@@ -1,16 +1,18 @@
+// src/pages/admin/TeachersPage.jsx
 import { useState } from 'react'
-import Loading from '@/components/ui/Loading'
-import { ErrorDisplay } from '@/components/ui/Loading'
 import { useTeachers, useCreateTeacher, useUpdateTeacher, useDeleteTeacher } from '@/api/hooks/useTeachers'
 import TeacherList from '@/components/features/teachers/TeacherList'
 import TeacherForm from '@/components/forms/TeacherForm'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
 } from "@/components/ui/dialog"
+import Loading from '@/components/ui/Loading'
+import { ErrorDisplay } from '@/components/ui/Loading'
 
 export default function TeachersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -24,7 +26,6 @@ export default function TeachersPage() {
   if (isLoading) return <Loading message="Loading teachers..." />
   if (error) return <ErrorDisplay message={error.message} onRetry={refetch} />
 
-
   const handleSubmit = (data) => {
     if (selectedTeacher) {
       updateTeacher({ id: selectedTeacher.id, data })
@@ -35,27 +36,49 @@ export default function TeachersPage() {
     setSelectedTeacher(null)
   }
 
+  const handleEdit = (teacher) => {
+    setSelectedTeacher(teacher)
+    setIsModalOpen(true)
+  }
+
   return (
-    <div>
-      <h1>Teachers Management</h1>
-      <button onClick={() => setIsModalOpen(true)}>Add Teacher</button>
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Teachers</h1>
+          <p className="text-muted-foreground">Manage teaching staff and assignments</p>
+        </div>
+        <Button onClick={() => {
+          setSelectedTeacher(null)
+          setIsModalOpen(true)
+        }}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Teacher
+        </Button>
+      </div>
 
-      <TeacherList />
+      {/* List */}
+      <TeacherList onTeacherClick={handleEdit} />
 
+      {/* Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Title here</DialogTitle>
+            <DialogTitle>
+              {selectedTeacher ? 'Edit Teacher' : 'Add New Teacher'}
+            </DialogTitle>
           </DialogHeader>
-
           <TeacherForm
             teacher={selectedTeacher}
             onSubmit={handleSubmit}
-            onCancel={() => setIsModalOpen(false)}
+            onCancel={() => {
+              setIsModalOpen(false)
+              setSelectedTeacher(null)
+            }}
           />
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

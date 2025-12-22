@@ -39,12 +39,14 @@ export function Layout({ children }) {
           { name: t('nav.subjects'), href: '/admin/subjects', icon: BookOpen },
           { name: t('nav.timetables'), href: '/admin/timetables', icon: Calendar },
           { name: t('nav.registrations'), href: '/admin/registrations', icon: ClipboardList },
+          { name: t('nav.classes'), href: '/admin/classes', icon: GraduationCap },
         ]
 
       case 'guardian':
         return [
           { name: t('nav.dashboard'), href: '/guardian/dashboard', icon: Home },
           { name: t('nav.myStudents'), href: '/guardian/students', icon: Users },
+
         ]
 
       case 'teacher':
@@ -52,6 +54,7 @@ export function Layout({ children }) {
           { name: t('nav.dashboard'), href: '/teacher/dashboard', icon: Home },
           { name: t('nav.subjects'), href: '/teacher/subjects', icon: BookOpen },
           { name: t('nav.timetables'), href: '/teacher/timetable', icon: Calendar },
+          
         ]
 
       case 'student':
@@ -59,6 +62,7 @@ export function Layout({ children }) {
           { name: t('nav.dashboard'), href: '/student/dashboard', icon: Home },
           { name: t('nav.timetables'), href: '/student/timetable', icon: Calendar },
           { name: t('nav.subjects'), href: '/student/subjects', icon: BookOpen },
+          { name: t('nav.myClass'), href: '/student/my-class', icon: GraduationCap },
         ]
 
       default:

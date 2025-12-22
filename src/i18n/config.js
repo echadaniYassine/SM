@@ -16,6 +16,7 @@ const resources = {
         guardians: 'Guardians',
         subjects: 'Subjects',
         registrations: 'Registrations',
+        classes: 'Classes',
         profile: 'Profile',
         logout: 'Logout'
       },
@@ -195,6 +196,7 @@ const resources = {
         timetables: 'Emplois du temps',
         subjects: 'Matières',
         registrations: 'Inscriptions',
+        classes: 'classes',
         profile: 'Profil',
         logout: 'Déconnexion'
       },
@@ -375,6 +377,7 @@ const resources = {
         timetables: 'الجداول الزمنية',
         subjects: 'المواد',
         registrations: 'التسجيلات',
+        classes: 'الفصول',
         profile: 'الملف الشخصي',
         logout: 'تسجيل الخروج'
       },

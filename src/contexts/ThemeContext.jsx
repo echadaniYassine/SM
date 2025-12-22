@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 const ThemeContext = createContext({
-  theme: 'light',
+  theme: 'system',
   setTheme: () => { },
   toggleTheme: () => { }
 })
@@ -17,6 +17,7 @@ const THEMES = {
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useLocalStorage('theme', THEMES.SYSTEM)
 
+  // Apply theme to document
   useEffect(() => {
     const root = window.document.documentElement
 
@@ -28,12 +29,18 @@ export function ThemeProvider({ children }) {
         ? THEMES.DARK
         : THEMES.LIGHT
       root.classList.add(systemTheme)
-    } else {
+    } else if (theme === THEMES.LIGHT || theme === THEMES.DARK) {
       root.classList.add(theme)
+    } else {
+      // Invalid theme value, default to system
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? THEMES.DARK
+        : THEMES.LIGHT
+      root.classList.add(systemTheme)
     }
   }, [theme])
 
-  // Listen for system theme changes
+  // Listen for system theme changes when using system theme
   useEffect(() => {
     if (theme === THEMES.SYSTEM) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -44,19 +51,29 @@ export function ThemeProvider({ children }) {
         root.classList.add(e.matches ? THEMES.DARK : THEMES.LIGHT)
       }
 
+      // Add listener
       mediaQuery.addEventListener('change', handleChange)
+
+      // Cleanup
       return () => mediaQuery.removeEventListener('change', handleChange)
     }
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === THEMES.LIGHT ? THEMES.DARK : THEMES.LIGHT)
+    setTheme(prev => {
+      // Only toggle between light and dark (not system)
+      if (prev === THEMES.LIGHT) return THEMES.DARK
+      if (prev === THEMES.DARK) return THEMES.LIGHT
+      // If system, default to dark
+      return THEMES.DARK
+    })
   }
 
   const value = {
     theme,
     setTheme,
-    toggleTheme
+    toggleTheme,
+    themes: THEMES
   }
 
   return (

@@ -34,7 +34,7 @@ export function Sidebar({
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
         <div className="flex flex-col flex-grow bg-card border-r shadow-sm">
-          
+
           {/* Logo */}
           <div className="flex items-center justify-center h-16 px-4 border-b">
             <div className="flex items-center gap-2">
@@ -83,25 +83,23 @@ export function Sidebar({
 
           {/* User Menu */}
           <div className="p-4 border-t">
-            <div className="flex items-center gap-3 p-2 rounded-lg">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium">
-                {user?.name?.charAt(0)?.toUpperCase()}
+            <Link
+              to="/profile"
+              className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md"
+            >
+              <div className="flex items-center gap-3 p-2 rounded-lg">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium">
+                  {user?.name?.charAt(0)?.toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
-              </div>
-            </div>
+            </Link>
+
 
             <div className="mt-3 space-y-1">
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md"
-              >
-                <User className="w-4 h-4" />
-                {t('nav.profile')}
-              </Link>
-
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md w-full text-left"

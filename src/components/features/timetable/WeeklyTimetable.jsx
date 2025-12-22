@@ -1,6 +1,8 @@
+// src/components/features/timetable/WeeklyTimetable.jsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Clock, MapPin } from 'lucide-react'
+import { MapPin, User } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function WeeklyTimetable({ timetables = [] }) {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
@@ -17,11 +19,17 @@ export default function WeeklyTimetable({ timetables = [] }) {
   const timeSlots = [...new Set(timetables.map(t => `${t.start_time} - ${t.end_time}`))]
     .sort()
 
+  const formatTime = (time) => time?.slice(0, 5) || '—'
+
   if (timetables.length === 0) {
     return (
       <Card>
-        <CardContent className="pt-6 text-center text-muted-foreground">
-          No timetable entries found
+        <CardContent className="pt-6">
+          <Alert>
+            <AlertDescription>
+              No timetable entries found. Click "Add Schedule" to create one.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     )
@@ -38,23 +46,26 @@ export default function WeeklyTimetable({ timetables = [] }) {
           return (
             <Card key={day}>
               <CardHeader>
-                <CardTitle>{day}</CardTitle>
+                <CardTitle className="text-lg">{day}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {dayClasses.map(item => (
                   <div
                     key={item.id}
-                    className="p-3 border rounded-lg"
+                    className="p-3 border rounded-lg hover:bg-accent transition-colors"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-semibold">{item.subject?.name}</h4>
                       <Badge variant="outline">
-                        {item.start_time}
+                        {formatTime(item.start_time)}
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                      {item.teacher?.name && (
-                        <p>Teacher: {item.teacher.name}</p>
+                      {item.subject?.teacher?.name && (
+                        <p className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {item.subject.teacher.name}
+                        </p>
                       )}
                       {item.room && (
                         <p className="flex items-center gap-1">
@@ -76,9 +87,11 @@ export default function WeeklyTimetable({ timetables = [] }) {
         <CardContent className="pt-6">
           <div className="grid grid-cols-6 gap-2 min-w-[800px]">
             {/* Header */}
-            <div className="font-semibold p-3 text-center">Time</div>
+            <div className="font-semibold p-3 text-center bg-muted rounded-t-lg">
+              Time
+            </div>
             {days.map(day => (
-              <div key={day} className="font-semibold p-3 text-center">
+              <div key={day} className="font-semibold p-3 text-center bg-muted rounded-t-lg">
                 {day}
               </div>
             ))}
@@ -86,7 +99,7 @@ export default function WeeklyTimetable({ timetables = [] }) {
             {/* Time slots */}
             {timeSlots.map(slot => (
               <>
-                <div key={slot} className="p-3 text-sm text-center border-r">
+                <div key={slot} className="p-3 text-sm text-center border-r font-medium bg-muted/50">
                   {slot}
                 </div>
                 {days.map(day => {
@@ -97,13 +110,19 @@ export default function WeeklyTimetable({ timetables = [] }) {
                   return (
                     <div key={`${day}-${slot}`} className="p-2">
                       {classItem ? (
-                        <div className="p-3 border rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
+                        <div className="p-3 border rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors h-full">
                           <div className="font-semibold text-sm mb-1">
                             {classItem.subject?.name}
                           </div>
-                          {classItem.teacher?.name && (
-                            <div className="text-xs text-muted-foreground">
-                              {classItem.teacher.name}
+                          {classItem.subject?.code && (
+                            <Badge variant="outline" className="text-xs mb-1">
+                              {classItem.subject.code}
+                            </Badge>
+                          )}
+                          {classItem.subject?.teacher?.name && (
+                            <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <User className="h-3 w-3" />
+                              {classItem.subject.teacher.name}
                             </div>
                           )}
                           {classItem.room && (
@@ -114,7 +133,7 @@ export default function WeeklyTimetable({ timetables = [] }) {
                           )}
                         </div>
                       ) : (
-                        <div className="h-full" />
+                        <div className="h-full min-h-[80px]" />
                       )}
                     </div>
                   )

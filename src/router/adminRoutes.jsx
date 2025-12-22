@@ -7,7 +7,7 @@ import ProgramsPage from '@/pages/admin/ProgramsPage'
 import SubjectsPage from '@/pages/admin/SubjectsPage'
 import TimetablePage from '@/pages/admin/TimetablePage'
 import RegistrationsPage from '@/pages/admin/RegistrationsPage'
-
+import SchoolClassesPage from '@/pages/admin/SchoolClassesPage'
 export const adminRoutes = [
   {
     path: 'dashboard',
@@ -40,5 +40,9 @@ export const adminRoutes = [
   {
     path: 'registrations',
     element: <RegistrationsPage />,
+  },
+  {
+    path: 'classes',
+    element: <SchoolClassesPage />,
   },
 ]
